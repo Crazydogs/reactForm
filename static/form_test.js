@@ -39,9 +39,7 @@ define(function (require, exports, module) {
                         list.push(
                             React.createElement(ComponentInput, {
                                 submitKey: item, 
-                                value: data[item].value, 
                                 onChange: this.handleChange, 
-                                dependent: data[item].dependent, 
                                 formData: this.state.items}
                             )
                         );
@@ -49,11 +47,8 @@ define(function (require, exports, module) {
                     case 'radio':
                         list.push(
                             React.createElement(ComponentRadio, {
-                                radios: data[item].radios, 
                                 submitKey: item, 
-                                value: data[item].value, 
                                 onChange: this.handleChange, 
-                                validate: data[item].validate, 
                                 formData: this.state.items}
                             )
                         )

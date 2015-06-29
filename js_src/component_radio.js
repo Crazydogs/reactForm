@@ -2,11 +2,15 @@
  *  单选框组
  *  接受 props
  *    输入
- *      radios: json 对象，{'选项名': 选项值}
- *      value: 单选组的值
  *      submitKey: 字符串，组件对应提交时的key
- *      renderState: 键值对，每个选项对应三种状态，默认为 normal
- *      validate: 字符串，可选值: 'need'
+ *      formData: json 对象，表单数据
+ *          label: 字符串，组件 label
+ *          radios: 数组，单选框组
+ *              key: 选项名
+ *              value: 选项值
+ *          validate: 数据合法规则
+ *          value: 当前值
+ *          dependent: json 对象，各个选项可用的条件
  *    输出
  *      onChange: 组件数据变化时触发此方法
  */
@@ -56,7 +60,6 @@ define(function (require, exports, module) {
                 list.push(this.createRadio(radios[i]))
             }
 
-            console.log(this.state);
             return (
                 <div className={'component-radio' + (this.state.validateState?'':' component-warning')}>
                     <label className="component-label">{label}</label>
@@ -113,7 +116,7 @@ define(function (require, exports, module) {
             var componentData = props.formData[props.submitKey];
             var validate = componentData.validate;
             if (validate && validate === 'need') {
-                if (typeof(props.value) === 'undefined') {
+                if (typeof(componentData.value) === 'undefined') {
                     this.setState({validateState: false});
                     return false;
                 }
