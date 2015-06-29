@@ -1,5 +1,8 @@
 /*
- * 测试用表单
+ *  测试用表单
+ *  渲染依赖于传入数据
+ *  接受 props
+ *      data: json 对象，表单包含的元素，以及他们的渲染状态和依赖
  */
 
 define(function (require, exports, module) {
@@ -9,29 +12,54 @@ define(function (require, exports, module) {
     var form = React.createClass({displayName: "form",
         getInitialState: function () {
             return {
-                radio1: 1
+                items: this.props.formData.items
             };
         },
         handleChange: function (data) {
-            this.setState(data);
+            // 复制 state, 但仅能复制简单数据
+            var nextState = JSON.parse(JSON.stringify(this.state));
+            for (key in data) {
+                nextState.items[key].value = data[key];
+            }
+            this.setState(nextState);
         },
         render: function () {
+            var list = this.renderList(this.state.items);
             return (
-                React.createElement("form", null, 
-                    React.createElement(ComponentRadio, {
-                        radios: "{\"test1\": 1, \"test2\": 2}", 
-                        submitKey: "radio1", 
-                        value: this.state.radio1, 
-                        onChange: this.handleChange, 
-                        validate: "need"}
-                    ), 
-                    React.createElement(ComponentInput, {
-                        submitKey: "text1", 
-                        value: this.state.text1, 
-                        onChange: this.handleChange}
-                    )
+                React.createElement("form", {className: "component-form"}, 
+                    list
                 )
             );
+        },
+        renderList: function (data) {
+            var list = [];
+            for (item in data) {
+                switch (data[item].type) {
+                    case 'input':
+                        list.push(
+                            React.createElement(ComponentInput, {
+                                submitKey: item, 
+                                value: data[item].value, 
+                                onChange: this.handleChange, 
+                                dependent: data[item].dependent, 
+                                formData: this.state.items}
+                            )
+                        );
+                    break;
+                    case 'radio':
+                        list.push(
+                            React.createElement(ComponentRadio, {
+                                radios: data[item].radios, 
+                                submitKey: item, 
+                                value: data[item].value, 
+                                onChange: this.handleChange, 
+                                validate: data[item].validate}
+                            )
+                        )
+                    break;
+                }
+            }
+            return list;
         }
     });
 
