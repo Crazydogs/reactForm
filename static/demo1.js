@@ -7,9 +7,19 @@ require(['static/form_test.js'], function( DemoForm ){
         items: {
             radio1: {
                 type: 'radio',
-                radios: '{"test1": 1, "test2": 2}',
+                label: '越来越短→_→',
+                radios: [
+                    {key: "我是单选框1（— —）", value: 1},
+                    {key: "我是2←_←", value: 2},
+                    {key: "3", value: 3}
+                ],
                 validate: 'need',
-                value: 1
+                value: 1,
+                dependent: {
+                    "3": {
+                        input1: 'lalala'
+                    }
+                }
             },
             input1: {
                 type: 'input',

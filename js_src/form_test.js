@@ -54,6 +54,7 @@ define(function (require, exports, module) {
                                 value={data[item].value}
                                 onChange={this.handleChange}
                                 validate={data[item].validate}
+                                formData={this.state.items}
                             />
                         )
                     break;

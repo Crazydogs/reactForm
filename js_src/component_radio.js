@@ -13,78 +13,114 @@
 
 define(function (require, exports, module) {
     var radio = React.createClass({
-        getInitialState: function() {
+        getInitialState: function () {
             return {
-                // renderState 共有三种状态
-                // normal, hide, disable
-                renderState: this.props.renderState || '{}',
-                validateState: this.validateData()
+                validateState: this.validateData(),
+                dependentState: this.checkDependent()
             }
         },
         componentWillReceiveProps: function (nextProps) {
             this.validateData(nextProps);
+            this.checkDependent(nextProps);
         },
         handleClick: function (data) {
             var newData = {};
             newData[this.props.submitKey] = data;
             this.props.onChange(newData);
         },
-        createRadio: function (selected, renderState, text, value) {
-            var spanStyle = {};
-            switch (renderState) {
-                case 'hide':
-                    spanStyle['display'] = 'none';
-                break;
-                case 'disable':
-                    var disable = true;
-                break;
-            }
+        createRadio: function (data) {
+            var componentData = this.props.formData[this.props.submitKey];
+            var selected = data.value === componentData.value ? true : false;
+            var dependent = this.state.dependentState[data.key];
             var radio = (
-                <span className="component-radio-group" style={spanStyle}>
+                <span className="component-radio-group">
                     <input
                         type="radio" name={this.props.submitKey}
                         checked={selected}
-                        onClick={this.handleClick.bind(this, value)}
-                        disabled={disable}
-                        key={text}
+                        onClick={this.handleClick.bind(this, data.value)}
+                        disabled={!dependent}
+                        key={data.key}
                     />
-                    {text}
+                    {data.key}
                 </span>
             );
 
             return radio;
         },
-        validateData: function (nextProps) {
-            var props = nextProps || this.props;
-            if (props.validate && props.validate === 'need') {
-                if (typeof(props.value) === 'undefined') {
-                    this.setState({validateState: false});
-                    return false;
-                } else {
-                    this.setState({validateState: true});
-                    return true;
-                }
-            }
-        },
         render: function () {
-            var radios = JSON.parse(this.props.radios);
-            var states = JSON.parse(this.state.renderState);
+            var componentData = this.props.formData[this.props.submitKey];
+            var radios = componentData.radios;
+            var label = componentData.label;
             var list = [];
-            for (label in radios) {
-                var state = states[label] ? states[label] : 'normal';
-                if (this.props.value == radios[label]) {
-                    list.push(this.createRadio(true, state, label, radios[label]));
-                } else {
-                    list.push(this.createRadio(false, state, label, radios[label]));
-                }
+            for (var i = 0; i < radios.length; i++) {
+                list.push(this.createRadio(radios[i]))
             }
 
+            console.log(this.state);
             return (
                 <div className={'component-radio' + (this.state.validateState?'':' component-warning')}>
+                    <label className="component-label">{label}</label>
                     {list}
                 </div>
             );
-        }
+        },
+        checkDependent: function (nextProps) {
+            var props = nextProps || this.props;
+            var dependent = props.formData[props.submitKey].dependent;
+            var dependentState =
+                (this.state && this.state.dependentState)
+                ? JSON.parse(JSON.stringify(this.state.dependentState)) // 拷贝
+                : {};
+            var radios = props.formData[props.submitKey].radios;
+
+            // 校验依赖是否成立
+            for (var i = 0; i < radios.length; i++) {
+                var key = radios[i].key;
+                if(dependent && dependent[key]){
+                    // 对每个选项进行校验
+                    var rules = dependent[key];
+                    var flag = true;
+                    for (rule in rules) {
+                        // 对选项的每一个依赖进行校验
+                        if (rules[rule] != props.formData[rule].value){
+                            dependentState[key] = false;
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        dependentState[key] = true;
+                    }
+                } else {
+                    dependentState[key] = true;
+                }
+
+                if (!dependentState[key]) {
+                    var value = props.formData[props.submitKey].value;
+                    if (value === radios[i].value) {
+                        // 如果依赖不能满足，且此选项被选中，把组件的值设为空
+                        this.handleClick(undefined);
+                    }
+                }
+            }
+
+            this.setState({dependentState: dependentState});
+            return dependentState;
+        },
+
+        validateData: function (nextProps) {
+            var props = nextProps || this.props;
+            var componentData = props.formData[props.submitKey];
+            var validate = componentData.validate;
+            if (validate && validate === 'need') {
+                if (typeof(props.value) === 'undefined') {
+                    this.setState({validateState: false});
+                    return false;
+                }
+            }
+            this.setState({validateState: true});
+            return true;
+        },
     });
 
     return radio;

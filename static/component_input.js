@@ -38,8 +38,8 @@ define(function (require, exports, module) {
                 };
             }
             return (
-                React.createElement("div", {className: 'component-radio' + (this.state.validateState?'':' component-warning')}, 
-                    React.createElement("label", null, this.state.componentData.label), 
+                React.createElement("div", {className: 'component-input' + (this.state.validateState?'':' component-warning')}, 
+                    React.createElement("label", {className: "component-label"}, this.state.componentData.label), 
                     React.createElement("input", {ref: "inputDom", 
                         onChange: this.handleChange, 
                         value: this.props.value || '', 

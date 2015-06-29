@@ -38,8 +38,8 @@ define(function (require, exports, module) {
                 };
             }
             return (
-                <div className={'component-radio' + (this.state.validateState?'':' component-warning')}>
-                    <label>{this.state.componentData.label}</label>
+                <div className={'component-input' + (this.state.validateState?'':' component-warning')}>
+                    <label className='component-label'>{this.state.componentData.label}</label>
                     <input ref="inputDom"
                         onChange={this.handleChange}
                         value={this.props.value || ''}
